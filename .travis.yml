@@ -15,4 +15,4 @@ install:
   - "pip install pytest"
 # command to run tests
 script:
-  - pytest test_pycycle.py
+  - "python setup.py test"

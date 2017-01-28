@@ -43,6 +43,8 @@ setup(
         'console_scripts': ['pycycle=pycycle:cli'],
     },
     install_requires=required,
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     license='MIT',
     classifiers=[
         'Programming Language :: Python',
