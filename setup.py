@@ -27,6 +27,7 @@ required = [
     'crayons',
     'click>=6.7',
     'click-completion',
+    'pytest'
 ]
 
 setup(
