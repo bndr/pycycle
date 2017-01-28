@@ -107,6 +107,6 @@ def get_cycle_path(root, acc=[], seen=set()):
         seen.add(item.full_path)
         if item.imports:
             acc.append(item)
-            return get_cycle_path(item)
+            return get_cycle_path(item, acc, seen)
 
-    return format_path(acc)
+    return ''

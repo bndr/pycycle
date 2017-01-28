@@ -22,7 +22,7 @@ def test_simple_project():
     assert root_node != None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
-    assert pycycle.utils.get_cycle_path(root_node) == project['result']
+    assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == project['result']
 
 
 def test_no_circular_imports():
@@ -33,7 +33,7 @@ def test_no_circular_imports():
     assert root_node != None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
-    assert pycycle.utils.get_cycle_path(root_node) == ''
+    assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == ''
 
 
 def test_large_circle():
@@ -45,4 +45,15 @@ def test_large_circle():
     assert root_node != None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
-    assert pycycle.utils.get_cycle_path(root_node) == project['result']
+    assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == project['result']
+
+
+def test_large_no_circle():
+    project = {'path': os.path.abspath('./tests/_projects/large_without_circle'),
+               'has_cycle': False,
+               'result': ''}
+    root_node = pycycle.utils.read_project(project['path'])
+    assert root_node != None
+    assert pycycle.utils.check_if_cycles_exist(
+        root_node) == project['has_cycle']
+    assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == ''
