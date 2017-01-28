@@ -19,10 +19,6 @@ about = {}
 with open(os.path.join(base_dir, "pycycle", "__version__.py")) as f:
     exec(f.read(), about)
 
-if sys.argv[-1] == "publish":
-    os.system("python setup.py sdist bdist_wheel upload")
-    sys.exit()
-
 required = [
     'crayons',
     'click>=6.7',
