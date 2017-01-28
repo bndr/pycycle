@@ -13,7 +13,7 @@ Pycycle: Find and fix circular imports in python projects
 .. image:: https://img.shields.io/pypi/pyversions/pipenv.svg
     :target: https://pypi.python.org/pypi/pycycle
 
-.. image:: https://travis-ci.org/bndr/pycycle.svg?branch=master
+.. image:: https://api.travis-ci.org/bndr/pycycle.svg?branch=master
     :target: https://travis-ci.org/bndr/pycycle
 
 ---------------
