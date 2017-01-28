@@ -5,12 +5,35 @@ import sys
 import traceback
 import click
 import crayons
-from pycycle.graph.nodes import Node
+
 
 if sys.version_info[0] > 2:
     open_func = open
 else:
     open_func = codecs.open
+
+
+class Node(object):
+
+    def __init__(self, name, imports=None, full_path=None, line_no=None):
+        self.name = name
+        if not imports:
+            self.imports = []
+        else:
+            self.imports = imports
+
+        self.line_no = line_no
+        self.full_path = full_path
+        self.marked = False
+
+    def __iter__(self):
+        return iter(self.imports)
+
+    def add(self, item):
+        self.imports.append(item)
+
+    def __repr__(self):
+        return str(len(self.imports))
 
 
 def read_project(root_path):

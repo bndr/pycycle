@@ -23,6 +23,8 @@ Pycycle: Find and fix circular imports in python projects
 `ImportError: Cannot import name X` is a python exception that is related to the circular imports, but it's not clear from the start.
 This tool automatically analyzes the imports of your projects, and looks for imports that may cause a circular dependency problem.
 
+.. image:: https://i.imgur.com/QVgTJ8h.gif
+
 Features
 --------
 
