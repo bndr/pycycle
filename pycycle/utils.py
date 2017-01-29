@@ -36,7 +36,7 @@ class Node(object):
         return str(len(self.imports))
 
 
-def read_project(root_path):
+def read_project(root_path, verbose=False, ignore=None):
     """
     Reads project into an AST and transforms imports into Nodes
     :param root_path: String
@@ -44,56 +44,77 @@ def read_project(root_path):
     """
     nodes = {}
     root_node = None
+    errors = False
+    ignore_files = {".hg", ".svn", ".git", ".tox", "__pycache__", "env", "venv"}
+
+    if ignore:
+        for ignored_file in ignore:
+            ignore_files.add(os.path.basename(os.path.realpath(ignored_file)))
+
     # traverse root directory, and list directories as dirs and files as files
     for root, dirs, files in os.walk(root_path):
+
+        dirs[:] = [d for d in dirs if d not in ignore_files]
+
+        files = [fn for fn in files if os.path.splitext(fn)[1] == ".py" and fn not in ignore_files]
+
         for file_name in files:
-            _, extname = os.path.splitext(file_name)
+            full_path = os.path.join(root, file_name)
+            with open_func(full_path, "r", encoding=None) as f:
+                try:
+                    # fails on empty files
+                    tree = ast.parse(f.read())
+                    if verbose:
+                        click.echo(crayons.yellow('Trying to parse file: {}'.format(full_path)))
 
-            if extname == ".py":
-                full_path = os.path.join(root, file_name)
-                with open_func(full_path, "r", encoding=None) as f:
-                    try:
-                        # fails on empty files
-                        tree = ast.parse(f.read())
-                        if full_path in nodes:
-                            node = nodes[full_path]
-                        else:
-                            node = Node(file_name[:-3], full_path=full_path)
-                            nodes[full_path] = node
+                    if full_path in nodes:
+                        node = nodes[full_path]
+                    else:
+                        node = Node(file_name[:-3], full_path=full_path)
+                        nodes[full_path] = node
 
-                        if not root_node:
-                            root_node = node
+                    if not root_node:
+                        root_node = node
 
-                        for ast_node in ast.walk(tree):
-                            if isinstance(ast_node, ast.Import):
-                                for subnode in ast_node.names:
-                                    path_to_module = get_path_from_package_name(
-                                        root_path, subnode.name)
-
-                                    if path_to_module in nodes:
-                                        new_node = nodes[path_to_module]
-                                    else:
-                                        new_node = Node(
-                                            subnode.name, full_path=path_to_module)
-                                        nodes[path_to_module] = new_node
-                                    node.line_no = ast_node.lineno
-                                    node.add(new_node)
-
-                            elif isinstance(ast_node, ast.ImportFrom):
+                    for ast_node in ast.walk(tree):
+                        if isinstance(ast_node, ast.Import) and ast_node.names:
+                            for subnode in ast_node.names:
+                                if not subnode.name:
+                                    continue
                                 path_to_module = get_path_from_package_name(
-                                    root_path, ast_node.module)
+                                    root_path, subnode.name)
 
                                 if path_to_module in nodes:
                                     new_node = nodes[path_to_module]
                                 else:
                                     new_node = Node(
-                                        ast_node.module, full_path=path_to_module)
+                                        subnode.name, full_path=path_to_module)
                                     nodes[path_to_module] = new_node
                                 node.line_no = ast_node.lineno
                                 node.add(new_node)
 
-                    except Exception as e:
-                        click.echo(crayons.red(traceback.print_exc(e)))
+                        elif isinstance(ast_node, ast.ImportFrom) and ast_node.module:
+                            path_to_module = get_path_from_package_name(
+                                root_path, ast_node.module)
+
+                            if path_to_module in nodes:
+                                new_node = nodes[path_to_module]
+                            else:
+                                new_node = Node(
+                                    ast_node.module, full_path=path_to_module)
+                                nodes[path_to_module] = new_node
+                            node.line_no = ast_node.lineno
+                            node.add(new_node)
+
+                except Exception as e:
+                    errors = True
+                    click.echo(crayons.yellow('Parsing of file failed: {}'.format(full_path)))
+                    if verbose:
+                        click.echo(crayons.red(traceback.format_exc(e)))
+
+    if errors:
+        click.echo(crayons.red('There were errors during the operation, perhaps you are trying to parse python 3 project, '
+                               'with python 2 version of the script? (or vice versa)'))
 
     return root_node
 

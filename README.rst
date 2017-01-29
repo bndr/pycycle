@@ -48,11 +48,17 @@ Usage
         $ pycycle --here
         Look for circular imports in another project
         $ pycycle --source /home/user/workspace/awesome_project
+        Ignore specific directories when looking for circular import
+        $ pycycle --source /home/user/workspace/awesome_project --ignore some_dir,some_dir2
+        Get verbose output
+        $ pycycle --source /home/user/workspace/awesome_project --verbose
 
     Options:
       --verbose      Verbose output.
       --here         Try to find cycles in the current project
       --source TEXT  Try to find cycles in the path provided
+      --ignore TEXT  Comma separated directories that will be ignored during
+                     analysis.
       --help         Show this message then exit.
       --version      Show the version and exit.
 
