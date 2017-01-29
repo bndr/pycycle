@@ -19,8 +19,10 @@ Pycycle: Find and fix circular imports in python projects
 ---------------
 
 
-**Pycycle** is an experimental project that aims to help developers fix their circular dependencies problems.
-`ImportError: Cannot import name X` is a python exception that is related to the circular imports, but it's not clear from the start.
+**Pycycle** is an experimental project that aims to help python developers fix their circular dependencies problems.
+
+*ImportError: Cannot import name X* is a python exception that is related to the circular imports, but the exception tells nothing about where or what.
+
 This tool automatically analyzes the imports of your projects, and looks for imports that may cause a circular dependency problem.
 
 .. image:: https://i.imgur.com/8JeLQxu.gif
