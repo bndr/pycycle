@@ -38,13 +38,14 @@ Options:""".format(
 
 @click.group(invoke_without_command=True)
 @click.option('--verbose', is_flag=True, default=False, help="Verbose output.")
-@click.option('--here', is_flag=True, default=False, help="Try to find cycles in the current project")
-@click.option('--source', default=False, help="Try to find cycles in the path provided")
+@click.option('--here', is_flag=True, default=False, help="Try to find cycles in the current project.")
+@click.option('--source', default=False, help="Try to find cycles in the path provided.")
 @click.option('--ignore', default='', help="Comma separated directories that will be ignored during analysis.")
+@click.option('--encoding', default=None, help="Change enconding with which the project is read.")
 @click.option('--help', is_flag=True, default=None, help="Show this message then exit.")
 @click.version_option(prog_name=crayons.yellow('pycycle'), version=__version__)
 @click.pass_context
-def cli(ctx, verbose=False, help=False, source=None, here=False, ignore=''):
+def cli(ctx, verbose=False, help=False, source=None, here=False, ignore='', encoding=None):
     if ctx.invoked_subcommand is None:
 
         if source:
@@ -66,7 +67,7 @@ def cli(ctx, verbose=False, help=False, source=None, here=False, ignore=''):
             click.echo(crayons.red('Directory does not exist.'), err=True)
             sys.exit(1)
 
-        root_node = read_project(source, verbose=verbose, ignore=ignore.split(','))
+        root_node = read_project(source, verbose=verbose, ignore=ignore.split(','), encoding=encoding)
 
         click.echo(crayons.yellow(
             'Project successfully transformed to AST, checking imports for cycles..'))

@@ -36,7 +36,7 @@ class Node(object):
         return str(len(self.imports))
 
 
-def read_project(root_path, verbose=False, ignore=None):
+def read_project(root_path, verbose=False, ignore=None, encoding=None):
     """
     Reads project into an AST and transforms imports into Nodes
     :param root_path: String
@@ -60,7 +60,7 @@ def read_project(root_path, verbose=False, ignore=None):
 
         for file_name in files:
             full_path = os.path.join(root, file_name)
-            with open_func(full_path, "r", encoding=None) as f:
+            with open_func(full_path, "r", encoding=encoding) as f:
                 try:
                     # fails on empty files
                     tree = ast.parse(f.read())
@@ -120,6 +120,8 @@ def read_project(root_path, verbose=False, ignore=None):
 
 
 def get_path_from_package_name(root, pkg):
+    if not pkg or not root:
+        return ''
     modules = pkg.split(".")
     return os.path.join(root, os.sep.join(modules) + '.py')
 

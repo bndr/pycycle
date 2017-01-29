@@ -54,13 +54,14 @@ Usage
         $ pycycle --source /home/user/workspace/awesome_project --verbose
 
     Options:
-      --verbose      Verbose output.
-      --here         Try to find cycles in the current project
-      --source TEXT  Try to find cycles in the path provided
-      --ignore TEXT  Comma separated directories that will be ignored during
-                     analysis.
-      --help         Show this message then exit.
-      --version      Show the version and exit.
+      --verbose        Verbose output.
+      --here           Try to find cycles in the current project.
+      --source TEXT    Try to find cycles in the path provided.
+      --ignore TEXT    Comma separated directories that will be ignored during
+                       analysis.
+      --encoding TEXT  Change enconding with which the project is read.
+      --help           Show this message then exit.
+      --version        Show the version and exit.
 
 ::
 
