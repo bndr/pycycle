@@ -45,7 +45,7 @@ def read_project(root_path, verbose=False, ignore=None):
     nodes = {}
     root_node = None
     errors = False
-    ignore_files = {".hg", ".svn", ".git", ".tox", "__pycache__", "env", "venv"}
+    ignore_files = set([".hg", ".svn", ".git", ".tox", "__pycache__", "env", "venv"]) # python 2.6 comp
 
     if ignore:
         for ignored_file in ignore:
