@@ -23,7 +23,7 @@ def test_format_path():
 def test_simple_project():
     project = {'path': os.path.abspath('./tests/_projects/a_references_b_b_references_a'),
                'has_cycle': True,
-               'result': 'b_module: Line 1 -> a_module: Line 2 =>> b_module'}
+               'result': 'b_module: Line 1 -> a_module: Line 3 =>> b_module'}
 
     root_node = pycycle.utils.read_project(project['path'])
     assert root_node != None
@@ -64,3 +64,15 @@ def test_large_no_circle():
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
     assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == ''
+
+
+
+def test_relative_imports():
+    project = {'path': os.path.abspath('./tests/_projects/relative_imports'),
+               'has_cycle': True,
+               'result': 'myapp.models: Line 1 -> managers: Line 1 =>> myapp.models'}
+    root_node = pycycle.utils.read_project(project['path'])
+    assert root_node != None
+    assert pycycle.utils.check_if_cycles_exist(
+        root_node) == project['has_cycle']
+    assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == project['result']

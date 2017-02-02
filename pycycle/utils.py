@@ -5,12 +5,15 @@ import sys
 import traceback
 import click
 import crayons
+import re
 
 
 if sys.version_info[0] > 2:
     open_func = open
 else:
     open_func = codecs.open
+
+REGEX_RELATIVE_PATTERN = re.compile('from \.')
 
 
 class Node(object):
@@ -63,7 +66,8 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
             with open_func(full_path, "r", encoding=encoding) as f:
                 try:
                     # fails on empty files
-                    tree = ast.parse(f.read())
+                    lines = f.readlines()
+                    tree = ast.parse('\n'.join(lines))
                     if verbose:
                         click.echo(crayons.yellow('Trying to parse file: {}'.format(full_path)))
 
@@ -81,6 +85,7 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
                             for subnode in ast_node.names:
                                 if not subnode.name:
                                     continue
+
                                 path_to_module = get_path_from_package_name(
                                     root_path, subnode.name)
 
@@ -94,8 +99,13 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
                                 node.add(new_node)
 
                         elif isinstance(ast_node, ast.ImportFrom) and ast_node.module:
+                            current_path = root_path
+
+                            if REGEX_RELATIVE_PATTERN.findall(lines[ast_node.lineno - 1]):
+                                current_path = root
+
                             path_to_module = get_path_from_package_name(
-                                root_path, ast_node.module)
+                                current_path, ast_node.module)
 
                             if path_to_module in nodes:
                                 new_node = nodes[path_to_module]
@@ -117,6 +127,7 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
                                'with python 2 version of the script? (or vice versa)'))
 
     return root_node
+
 
 
 def get_path_from_package_name(root, pkg):
