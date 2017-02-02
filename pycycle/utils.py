@@ -101,7 +101,8 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
                         elif isinstance(ast_node, ast.ImportFrom) and ast_node.module:
                             current_path = root_path
 
-                            if REGEX_RELATIVE_PATTERN.findall(lines[ast_node.lineno - 1]):
+                            if 0 <= ast_node.lineno - 1 < len(lines) and\
+                                    REGEX_RELATIVE_PATTERN.findall(lines[ast_node.lineno - 1]):
                                 current_path = root
 
                             path_to_module = get_path_from_package_name(
