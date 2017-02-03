@@ -66,8 +66,9 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
             with open_func(full_path, "r", encoding=encoding) as f:
                 try:
                     # fails on empty files
-                    lines = f.readlines()
-                    tree = ast.parse('\n'.join(lines))
+                    file_data = f.read()
+                    lines = file_data.splitlines()
+                    tree = ast.parse(file_data)
                     if verbose:
                         click.echo(crayons.yellow('Trying to parse file: {}'.format(full_path)))
 

@@ -23,7 +23,7 @@ def test_format_path():
 def test_simple_project():
     project = {'path': os.path.abspath('./tests/_projects/a_references_b_b_references_a'),
                'has_cycle': True,
-               'result': 'b_module: Line 1 -> a_module: Line 3 =>> b_module'}
+               'result': 'b_module: Line 1 -> a_module: Line 2 =>> b_module'}
 
     root_node = pycycle.utils.read_project(project['path'])
     assert root_node != None
