@@ -27,7 +27,10 @@ class Node(object):
 
         self.line_no = line_no
         self.full_path = full_path
-        self.marked = False
+        self.marked = 0
+        self.func_imports = {}
+        self.func_defs = {}
+        self.is_in_context = False
 
     def __iter__(self):
         return iter(self.imports)
@@ -101,7 +104,6 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
 
                         elif isinstance(ast_node, ast.ImportFrom) and ast_node.module:
                             current_path = root_path
-
                             if 0 <= ast_node.lineno - 1 < len(lines) and\
                                     REGEX_RELATIVE_PATTERN.findall(lines[ast_node.lineno - 1]):
                                 current_path = root
@@ -115,8 +117,17 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
                                 new_node = Node(
                                     ast_node.module, full_path=path_to_module)
                                 nodes[path_to_module] = new_node
+
+                            for obj_import in ast_node.names:
+                                if ast_node.lineno not in node.func_imports:
+                                    node.func_imports[ast_node.lineno] = [obj_import.name]
+                                else:
+                                    node.func_imports[ast_node.lineno].append(obj_import.name)
+
                             node.line_no = ast_node.lineno
                             node.add(new_node)
+                        elif isinstance(ast_node, (ast.ClassDef, ast.FunctionDef)):
+                            node.func_defs[ast_node.name] = ast_node.lineno
 
                 except Exception as e:
                     errors = True
@@ -127,9 +138,7 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
     if errors:
         click.echo(crayons.red('There were errors during the operation, perhaps you are trying to parse python 3 project, '
                                'with python 2 version of the script? (or vice versa)'))
-
     return root_node
-
 
 
 def get_path_from_package_name(root, pkg):
@@ -141,12 +150,24 @@ def get_path_from_package_name(root, pkg):
 
 def check_if_cycles_exist(root):
 
-    for item in root:
-        if item.marked:
-            return True
-        item.marked = True
-        if item.imports:
-            return check_if_cycles_exist(item)
+    previous = None
+    queue = [root]
+    while queue:
+        current_node = queue.pop()
+        if current_node.marked > 1:
+            return not current_node.is_in_context
+
+        for item in current_node:
+            if item.marked and previous:
+                for lineno, imports in previous.func_imports.iteritems():
+                    for import_obj in imports:
+                        if import_obj in item.func_defs\
+                                and item.line_no > item.func_defs[import_obj]:
+                            item.is_in_context = True
+            previous = item
+            queue.append(item)
+
+        current_node.marked += 1
 
     return False
 

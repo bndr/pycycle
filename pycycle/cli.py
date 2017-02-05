@@ -8,7 +8,7 @@ import sys
 
 # local imports
 from .__version__ import __version__
-from pycycle.utils import read_project, get_cycle_path
+from pycycle.utils import read_project, get_cycle_path, check_if_cycles_exist
 
 
 def format_help(_help):
@@ -71,11 +71,10 @@ def cli(ctx, verbose=False, help=False, source=None, here=False, ignore='', enco
 
         click.echo(crayons.yellow(
             'Project successfully transformed to AST, checking imports for cycles..'))
-        cycle_path = get_cycle_path(root_node)
 
-        if cycle_path:
+        if check_if_cycles_exist(root_node):
             click.echo(crayons.red('Cycle Found :('))
-            click.echo(crayons.red(cycle_path))
+            click.echo(crayons.red(get_cycle_path(root_node)))
             click.echo(crayons.green("Finished."))
             sys.exit(1)
         else:

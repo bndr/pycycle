@@ -37,7 +37,7 @@ def test_no_circular_imports():
                'has_cycle': False,
                'result': ''}
     root_node = pycycle.utils.read_project(project['path'])
-    assert root_node != None
+    assert root_node is not None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
     assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == ''
@@ -49,7 +49,7 @@ def test_large_circle():
                'result': 'a_module.a_file: Line 1 -> a_module.b_module.b_file: Line 1 -> c_module.c_file: Line 1 -> d_module.d_file: Line 1 =>> a_module.a_file'}
 
     root_node = pycycle.utils.read_project(project['path'])
-    assert root_node != None
+    assert root_node is not None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
     assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == project['result']
@@ -60,7 +60,7 @@ def test_large_no_circle():
                'has_cycle': False,
                'result': ''}
     root_node = pycycle.utils.read_project(project['path'])
-    assert root_node != None
+    assert root_node is not None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
     assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == ''
@@ -72,7 +72,17 @@ def test_relative_imports():
                'has_cycle': True,
                'result': 'myapp.models: Line 1 -> managers: Line 1 =>> myapp.models'}
     root_node = pycycle.utils.read_project(project['path'])
-    assert root_node != None
+    assert root_node is not None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
     assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == project['result']
+
+
+def test_import_context():
+    project = {'path': os.path.abspath('./tests/_projects/large_circle_context'),
+               'has_cycle': False,
+               'result': ''}
+    root_node = pycycle.utils.read_project(project['path'])
+    assert root_node is not None
+    assert pycycle.utils.check_if_cycles_exist(
+        root_node) == project['has_cycle']
