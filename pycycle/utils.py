@@ -159,7 +159,7 @@ def check_if_cycles_exist(root):
 
         for item in current_node:
             if item.marked and previous:
-                for lineno, imports in previous.func_imports.iteritems():
+                for lineno, imports in previous.func_imports.items():
                     for import_obj in imports:
                         if import_obj in item.func_defs\
                                 and item.line_no > item.func_defs[import_obj]:
