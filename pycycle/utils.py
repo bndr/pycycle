@@ -1,5 +1,6 @@
 import ast
 import codecs
+from collections import defaultdict
 import os
 import sys
 import traceback
@@ -25,9 +26,10 @@ class Node(object):
         else:
             self.imports = imports
 
-        self.line_no = line_no
+        self.is_imported_from = defaultdict(list)
         self.full_path = full_path
         self.marked = 0
+        self.parent = None
         self.func_imports = {}
         self.func_defs = {}
         self.is_in_context = False
@@ -99,7 +101,8 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
                                     new_node = Node(
                                         subnode.name, full_path=path_to_module)
                                     nodes[path_to_module] = new_node
-                                node.line_no = ast_node.lineno
+
+                                new_node.is_imported_from[full_path].append(ast_node.lineno)
                                 node.add(new_node)
 
                         elif isinstance(ast_node, ast.ImportFrom) and ast_node.module:
@@ -124,7 +127,7 @@ def read_project(root_path, verbose=False, ignore=None, encoding=None):
                                 else:
                                     node.func_imports[ast_node.lineno].append(obj_import.name)
 
-                            node.line_no = ast_node.lineno
+                            new_node.is_imported_from[full_path].append(ast_node.lineno)
                             node.add(new_node)
                         elif isinstance(ast_node, (ast.ClassDef, ast.FunctionDef)):
                             node.func_defs[ast_node.name] = ast_node.lineno
@@ -148,8 +151,32 @@ def get_path_from_package_name(root, pkg):
     return os.path.join(root, os.sep.join(modules) + '.py')
 
 
-def check_if_cycles_exist(root):
+def get_import_context(node):
+    """
+    Go backs up the graph to the import that started this possible cycle,
+    and gets the import line number
+    :param node:
+    :return: int
+    """
+    name = node.name
+    seen = set()
+    while node.parent and node.parent.parent:
+        node = node.parent
+        if node in seen or (node.parent and node.parent.name == name):
+            break
+        seen.add(node)
 
+    # Should never fail because we take the full_path of the parent. And as the parent imports this child
+    # there should at least be one number in the array
+    return node.is_imported_from[node.parent.full_path][0]
+
+
+def check_if_cycles_exist(root):
+    """
+    Goes through all nodes and looks for cycles, takes python import logic into account
+    :param root:
+    :return: bool
+    """
     previous = None
     queue = [root]
     while queue:
@@ -157,12 +184,20 @@ def check_if_cycles_exist(root):
         if current_node.marked > 1:
             return not current_node.is_in_context
 
-        for item in current_node:
+        for item in current_node.imports:
+
+            # Mark the current node as parent, so that we could trace the path from this node to the start node.
+            item.parent = current_node
             if item.marked and previous:
+
+                # This is a possible cycle, but maybe the import statement that started this all is under the function
+                # definition that is required
+                import_that_started = get_import_context(item)
                 for lineno, imports in previous.func_imports.items():
                     for import_obj in imports:
+                        # Compare the function definition line with the import line
                         if import_obj in item.func_defs\
-                                and item.line_no > item.func_defs[import_obj]:
+                                and import_that_started > item.func_defs[import_obj]:
                             item.is_in_context = True
             previous = item
             queue.append(item)
@@ -173,9 +208,25 @@ def check_if_cycles_exist(root):
 
 
 def format_path(path):
+    """
+    Format the cycle with colors
+    :param path:
+    :return: str
+    """
     if len(path) > 1:
-        return ' -> '.join([crayons.yellow(x.name) + ': Line ' + crayons.cyan(x.line_no) for x in path])\
-               + ' =>> ' + crayons.magenta(path[0].name)
+        result = [crayons.yellow(path[0].name)]
+
+        previous = path[0]
+        for item in path[1:]:
+            result.append(' -> ')
+            result.append(crayons.yellow(item.name))
+            result.append(': Line ')
+            result.append(crayons.cyan(str(item.is_imported_from[previous.full_path][0])))
+            previous = item
+        result.append(' =>> ')
+
+        result.append(crayons.magenta(path[0].name))
+        return ''.join(str(x) for x in result)
     else:
         return ''
 
