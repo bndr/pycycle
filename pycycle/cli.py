@@ -74,7 +74,7 @@ def cli(ctx, verbose=False, help=False, source=None, here=False, ignore='', enco
 
         if check_if_cycles_exist(root_node):
             click.echo(crayons.red('Cycle Found :('))
-            click.echo(crayons.red(get_cycle_path(root_node)))
+            click.echo(crayons.red(get_cycle_path(root_node, verbose=verbose)))
             click.echo(crayons.green("Finished."))
             sys.exit(1)
         else:
