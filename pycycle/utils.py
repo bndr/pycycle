@@ -213,7 +213,10 @@ def format_path(path):
     :param path:
     :return: str
     """
-    if len(path) > 1:
+    if len(path) == 1:
+        # print the node path if it recursively import itself
+        return str(path[0].full_path)
+    elif len(path) > 1:
         result = [crayons.yellow(path[0].name)]
 
         previous = path[0]
@@ -231,8 +234,10 @@ def format_path(path):
         return ''
 
 
-def get_cycle_path(root, acc=[], seen=set()):
+def get_cycle_path(root, acc=[], seen=set(), verbose=False):
     for item in root:
+        if verbose:
+            click.echo(crayons.yellow('Checking root: {} item: {}'.format(root.name, item.full_path)))
         if item.full_path in seen:
             return format_path(acc)
         seen.add(item.full_path)
