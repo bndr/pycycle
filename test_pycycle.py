@@ -9,11 +9,11 @@ def test_get_path_from_package_name():
 
     func = pycycle.utils.get_path_from_package_name
 
-    assert func('/test/one/two', 'some.package') == '/test/one/two/some/package.py'
+    assert func('/test/one/two', 'some.package') == os.path.normpath('/test/one/two/some/package.py')
     assert func('', 'some.package') == ''
     assert func('/', None) == ''
     assert func(None, 'some.package') == ''
-    assert func('/test/', 'some_package') == '/test/some_package.py'
+    assert func('/test/', 'some_package') == os.path.normpath('/test/some_package.py')
 
 
 def test_format_path():
@@ -26,7 +26,7 @@ def test_simple_project():
                'result': 'b_module -> a_module: Line 1 =>> b_module'}
 
     root_node = pycycle.utils.read_project(project['path'])
-    assert root_node != None
+    assert root_node is not None
     assert pycycle.utils.check_if_cycles_exist(
         root_node) == project['has_cycle']
     assert pycycle.utils.get_cycle_path(root_node, acc=[], seen=set()) == project['result']
