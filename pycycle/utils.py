@@ -148,7 +148,7 @@ def get_path_from_package_name(root, pkg):
     if not pkg or not root:
         return ''
     modules = pkg.split(".")
-    return os.path.join(root, os.sep.join(modules) + '.py')
+    return os.path.join(os.path.normpath(root), os.sep.join(modules) + '.py')
 
 
 def get_import_context(node):
