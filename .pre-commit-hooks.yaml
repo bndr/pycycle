@@ -1,6 +1,7 @@
  -  id: pycycle
     name: Pycycle - the circular dependency finder
-    language: python3
-    entry: pycycle --here
-    files: *.py
-    types: [text]
+    language: python
+    entry: pycycle
+    types: [python]
+    pass_filenames: false
+    args: [--here]
