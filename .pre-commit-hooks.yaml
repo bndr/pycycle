@@ -1,0 +1,7 @@
+ -  id: pycycle
+    name: Pycycle - the circular dependency finder
+    language: python
+    entry: pycycle
+    types: [python]
+    pass_filenames: false
+    args: [--here]
