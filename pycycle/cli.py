@@ -39,7 +39,7 @@ Options:""".format(
 @click.group(invoke_without_command=True)
 @click.option('--verbose', is_flag=True, default=False, help="Verbose output.")
 @click.option('--here', is_flag=True, default=False, help="Try to find cycles in the current project.")
-@click.option('--source', default=False, help="Try to find cycles in the path provided.")
+@click.option('--source', default='', help="Try to find cycles in the path provided.")
 @click.option('--ignore', default='', help="Comma separated directories that will be ignored during analysis.")
 @click.option('--encoding', default=None, help="Change enconding with which the project is read.")
 @click.option('--help', is_flag=True, default=None, help="Show this message then exit.")
